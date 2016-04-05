@@ -121,6 +121,7 @@ plotVmaxIntervals <- function(data, windowSize = 10, smoothing = 31, timeStart =
 	#loop through wells
 	for(i in 1:nrows) for(j in 1:ncols){
 		#subset
+		toPlot <- subset(data, row==i & column==j)
 		dd <- subset(data, row==i & column==j & time>=timeStart & time<=timeEnd)
 		#time
 		x <- dd$time
@@ -142,13 +143,16 @@ plotVmaxIntervals <- function(data, windowSize = 10, smoothing = 31, timeStart =
 		Vmax <- (VmaxElement$y[nrow(VmaxElement)] - VmaxElement$y[1]) / (VmaxElement$x[nrow(VmaxElement)] - VmaxElement$x[1]) * 60
 		
 		#make plots
-		plot(y ~ x,
+		plot(toPlot$OD ~ toPlot$time,
 			cex=0.5, pch=19,
 			xlab = "Time (s)", ylab = "OD",
 			main=sprintf("row = %i\ncol = %i",i,j),
 			ylim=c(0,globalYmax), xlim=c(0,globalXmax),
-			type= 'o'
+			type= 'o',
+			col="grey"
 		)
+		points(y ~ x,
+			cex=0.5, pch=19)
 		abline(lm(VmaxElement$y ~ VmaxElement$x), lwd = 2, col = "red")
 		#report Vmax per minute
 		text(globalXmax, 0, paste("Vmax = ", signif(Vmax, 4)), pos=2)
@@ -175,6 +179,7 @@ plotVmaxRegression <- function(data, smoothing = 31, timeStart = 0, timeEnd = gl
 	#loop through wells
 	for(i in 1:nrows) for(j in 1:ncols){
 		#subset
+		toPlot <- subset(data, row==i & column==j)
 		dd <- subset(data, row==i & column==j & time>=timeStart & time<=timeEnd)
 		x <- dd$time
 		y <- runmed(dd$OD, smoothing)
@@ -185,7 +190,16 @@ plotVmaxRegression <- function(data, smoothing = 31, timeStart = 0, timeEnd = gl
 		Vmax <- modVmax$coefficients[2]
 		
  		#make plots
-		plot(y ~ x, cex=0.5, pch=19, xlab = "Time (s)", ylab = "OD", main=sprintf("row = %i\ncol = %i",i,j), ylim=c(0,globalYmax), xlim=c(0,globalXmax), type= 'o')
+		plot(toPlot$OD ~ toPlot$time,
+			cex=0.5, pch=19,
+			xlab = "Time (s)", ylab = "OD",
+			main=sprintf("row = %i\ncol = %i",i,j),
+			ylim=c(0,globalYmax), xlim=c(0,globalXmax),
+			type= 'o',
+			col="grey"
+		)
+		points(y ~ x,
+			cex=0.5, pch=19)
 		abline(modVmax, lwd = 2, col = "red")
 		#report Vmax per minute
 		text(globalXmax, 0, paste("Vmax = ", signif(Vmax*60, 4)), pos=2)
